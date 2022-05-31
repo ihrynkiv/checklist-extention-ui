@@ -33,7 +33,7 @@ export const ThemeToggle = () => {
                 <DarkModeToggle
                     onChange={handleThemeChange}
                     checked={isDarkMode}
-                    size={80}
+                    size={60}
                 />
             </div>
     )

@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from "react";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import React, {useState} from "react";
 import { GlobalHotKeys } from "react-hotkeys";
 
 import Form from "./components/Form";
@@ -20,7 +19,6 @@ const TABS_NAMES = Object.keys(TABS_MAP);
 const keyMap = {
   CLEAR_REVIEW: ["del", "backspace"],
   DELETE_REVIEW: ["shift+del", "shift+backspace"],
-  NAVIGATION: ["alt+1", "alt+2", "alt+3", "alt+4", "alt+5", "alt+6", "alt+7", "alt+8", "alt+9", "alt+0"],
   RIGHT: ["right", "d", "l"],
   LEFT: ["left", "a", "h"],
   CHECK_ITEM: ["1", "2", "3", "4", "5"]
@@ -28,45 +26,7 @@ const keyMap = {
 
 function App() {
   const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('defaultState')));
-
   const [tab, setTab] = useState(window.localStorage.getItem('tab') || CHECK_LIST_TYPES.STYLE);
-  const navigate = useNavigate();
-
-  const [searchParams] = useSearchParams()
-  const name = searchParams.get("name")
-  const url = searchParams.get("url")
-  const author = searchParams.get("author")
-  const repo = searchParams.get("repo")
-
-  const [reviews, setReviews] = useState(JSON.parse(localStorage.getItem('reviews')) || [])
-  const [active, setActive] = useState(+localStorage.getItem('activeReview') || 0)
-
-  useEffect(() => {
-    if (name && url ) {
-      const dataJSON = localStorage.getItem('reviews') || JSON.stringify([])
-      const data = JSON.parse(dataJSON)
-
-      const alreadyExist = data.findIndex(item => item.name === name  && (item.url.includes(url) || url.includes(item.url)))
-      if(alreadyExist === -1) {
-        data.push({name, url, author, repo, state: CHECK_LIST})
-        localStorage.setItem('reviews', JSON.stringify(data))
-      }
-
-      localStorage.setItem('activeReview', (alreadyExist + 1) || data.length)
-      setTasks(JSON.parse(localStorage.getItem('reviews'))?.[alreadyExist + 1])
-      setActive((alreadyExist + 1)  || data.length)
-      setReviews(data)
-    }
-  }, [author, name, repo, url])
-
-  useEffect(() => {
-    const defaultState = JSON.parse(localStorage.getItem('defaultState'))
-    if (reviews?.[active - 1]){
-      setTasks(reviews[active - 1]?.state || CHECK_LIST)
-    } else if (active === 0 && defaultState){
-      setTasks(defaultState)
-    }
-  }, [reviews, active, setTasks])
 
   function toggleTaskCompleted(id, e) {
     const updatedTasks = tasks.map(task => {
@@ -77,16 +37,7 @@ function App() {
     });
 
     setTasks(updatedTasks);
-    const reviews = JSON.parse(localStorage.getItem('reviews'))
-    const currentReview = reviews?.[active - 1]
-
-    if (currentReview) {
-      currentReview.state = updatedTasks
-      localStorage.setItem('reviews', JSON.stringify(reviews))
-      setReviews(reviews)
-    } else {
-      localStorage.setItem('defaultState', JSON.stringify(updatedTasks))
-    }
+    localStorage.setItem('defaultState', JSON.stringify(updatedTasks))
 
     if (e && e.target) {
       e.target.blur()
@@ -100,7 +51,7 @@ function App() {
       id={task.id}
       name={task.name}
       completed={task.completedId}
-      key={`${active}-${task.id}`}
+      key={`${task.id}`}
       toggleTaskCompleted={toggleTaskCompleted}
     />
   ));
@@ -118,46 +69,13 @@ function App() {
   const itemsNoun = inProgressItems.length !== 1 ? 'items' : 'item';
   const headingText = `${inProgressItems.length} ${itemsNoun} remaining`;
 
-  const clearHandler = (activeId) => {
-    const reviews = JSON.parse(localStorage.getItem('reviews'))
-    const currentReview = reviews?.[activeId || (active - 1)]
-    if (currentReview) {
-      currentReview.state = CHECK_LIST
-      localStorage.setItem('reviews', JSON.stringify(reviews))
-      setReviews(reviews)
-    } else {
-      localStorage.setItem('defaultState', JSON.stringify(CHECK_LIST))
-    }
+  const clearHandler = () => {
+    localStorage.setItem('defaultState', JSON.stringify(CHECK_LIST))
     setTasks(CHECK_LIST)
-  }
-
-  useEffect(() => {
-    navigate('/checklist')
-  }, [navigate])
-
-  const deleteHandler = () => {
-    if (!active) return
-
-    const newReviews = [...reviews]
-    newReviews.splice(active - 1, 1)
-
-    const newActive = active <= newReviews.length ? active : newReviews.length
-    localStorage.setItem('activeReview', newActive.toString())
-    localStorage.setItem('reviews', JSON.stringify(newReviews))
-
-    setActive(() => newActive)
-    setReviews(() => newReviews)
   }
 
   const handlers = {
     CLEAR_REVIEW: () => clearHandler(localStorage.getItem('activeReview') - 1),
-    NAVIGATION: (e) => {
-      const activeId = +e.code.match(/\d+/g)
-      if (isNaN(activeId)) return null
-      const newActive = activeId <= reviews?.length ? activeId : (reviews?.length || 0)
-      localStorage.setItem('activeReview', newActive.toString())
-      setActive(newActive)
-    },
     RIGHT: () => {
       const currentTab = localStorage.getItem('tab') || tab
       const activeTabIndex = TABS_NAMES.indexOf(currentTab)
@@ -186,7 +104,7 @@ function App() {
   return (
         <div className="todoapp stack-large" key={window.location.href}>
           <GlobalHotKeys handlers={handlers} keyMap={keyMap}/>
-          <Form reviews={reviews} active={active}/>
+          <Form/>
           <div className="filters btn-group stack-exception">
             { filterList }
           </div>

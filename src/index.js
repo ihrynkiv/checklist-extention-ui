@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter } from "react-router-dom";
 
 import App from './App';
 import ThemeContextWrapper from "./components/ThemeContextWrapper";
@@ -20,9 +19,7 @@ if (!localStorage.getItem('defaultState')) {
 ReactDOM.render(
     <ThemeContextWrapper>
       <React.StrictMode>
-          <BrowserRouter>
-              <App/>
-          </BrowserRouter>
+          <App/>
       </React.StrictMode>
     </ThemeContextWrapper>,
   document.getElementById('root')

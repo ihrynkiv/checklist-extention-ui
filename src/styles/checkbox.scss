@@ -8,15 +8,15 @@
   display: block;
   position: relative;
   min-height: 44px;
-  padding-left: 40px;
+  padding-left: 20px;
   clear: left;
 
   & > label::before, & > input[type="checkbox"] {
     box-sizing: border-box;
-    top: -2px;
-    left: -2px;
-    width: 44px;
-    height: 44px;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
   }
 
   & > input[type="checkbox"] {
@@ -53,10 +53,10 @@
     box-sizing: content-box;
     content: "";
     position: absolute;
-    top: 11px;
-    left: 9px;
-    width: 18px;
-    height: 7px;
+    top: 8px;
+    left: 5px;
+    width: 15px;
+    height: 5px;
     transform: rotate(-45deg);
     border: solid;
     border-width: 0 0 5px 5px;
@@ -69,10 +69,10 @@
     box-sizing: content-box;
     content: "\274c";
     position: absolute;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    top: 6px;
-    left: 8px;
+    top: 3px;
+    left: 5px;
     text-align: center;
     opacity: 0;
     background: transparent;

@@ -11,11 +11,11 @@ export const CHECK_LIST = [
     { id: "2", name: "Filename is consistent with the component name", completedId: 0, type: CHECK_LIST_TYPES.STYLE },
     { id: "4", name: "Do not use reserved names in naming other entities", completedId: 0, type: CHECK_LIST_TYPES.STYLE },
 
-    { id: "9", name: "There is no unnecessary code duplication", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
-    { id: "6", name: "Edge cases: All edge cases are covered. Errors are handled", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
-    { id: "8", name: "Backward compatibility: New code should work with old functionality", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
-    { id: "7", name: "Dependencies: How written code can influence other parts of the project", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
-    { id: "5", name: "PR is relevant to the story. You should understand how it solves the problem", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
+    { id: "5", name: "There is no unnecessary code duplication", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
+    { id: "6", name: "Ege cases are covered. Errors are handled", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
+    { id: "7", name: "New code should work with old functionality", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
+    { id: "8", name: "Think about how it can influence other parts of the project", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
+    { id: "9", name: "Relevant to the story. You understand how it solves the problem", completedId: 0, type: CHECK_LIST_TYPES.SOLUTION },
 
     { id: "10", name: "Tests for utils", completedId: 0, type: CHECK_LIST_TYPES.TESTS },
     { id: "11", name: "Tests for hooks", completedId: 0, type: CHECK_LIST_TYPES.TESTS },
