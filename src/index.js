@@ -12,8 +12,8 @@ import './styles/todo.scss'
 import './styles/theme-toggle.scss'
 import './styles/dark.scss';
 
-if (!localStorage.getItem('defaultState')) {
-    localStorage.setItem('defaultState', JSON.stringify(CHECK_LIST))
+if (!localStorage.getItem('state')) {
+    localStorage.setItem('state', JSON.stringify(CHECK_LIST))
 }
 
 ReactDOM.render(

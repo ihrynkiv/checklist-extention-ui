@@ -25,7 +25,7 @@ const keyMap = {
 }
 
 function App() {
-  const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('defaultState')));
+  const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('state')));
   const [tab, setTab] = useState(window.localStorage.getItem('tab') || CHECK_LIST_TYPES.STYLE);
 
   function toggleTaskCompleted(id, e) {
@@ -37,7 +37,7 @@ function App() {
     });
 
     setTasks(updatedTasks);
-    localStorage.setItem('defaultState', JSON.stringify(updatedTasks))
+    localStorage.setItem('state', JSON.stringify(updatedTasks))
 
     if (e && e.target) {
       e.target.blur()
@@ -70,7 +70,7 @@ function App() {
   const headingText = `${inProgressItems.length} ${itemsNoun} remaining`;
 
   const clearHandler = () => {
-    localStorage.setItem('defaultState', JSON.stringify(CHECK_LIST))
+    localStorage.setItem('state', JSON.stringify(CHECK_LIST))
     setTasks(CHECK_LIST)
   }
 
