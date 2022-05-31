@@ -1,0 +1,20 @@
+{
+  "name": "List",
+  "version": "1.0",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "unlimitedStorage"
+  ],
+  "content_security_policy": "script-src 'self' 'sha256-8CiWpPj6CAEN+Y2qFNBi8DnTt4/2wWCEqt/kIZLLPB0='"
+}
