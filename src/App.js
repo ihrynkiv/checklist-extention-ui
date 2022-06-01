@@ -1,4 +1,5 @@
-import React, {useState} from "react";
+/*global chrome*/
+import React, {useEffect, useState} from "react";
 import { GlobalHotKeys } from "react-hotkeys";
 
 import Form from "./components/Form";
@@ -24,27 +25,91 @@ const keyMap = {
   CHECK_ITEM: ["1", "2", "3", "4", "5"]
 }
 
+const increaseActiveId = () => {
+  const activeId = +localStorage.getItem('activeId') || 0
+  localStorage.setItem('activeId', (activeId + 1).toString())
+}
+
+const buildKey = () => {
+  const activeId = +localStorage.getItem('activeId') || 0
+  return `key${activeId + 1}`
+}
+
+const getPullRequestID = (tabUrl) => {
+  if (!tabUrl) return null
+
+  const {pathname} = new URL(tabUrl)
+  const [,,repo,,prKey] = pathname.split('/')
+
+  if (!repo || !prKey) return null
+  return `${repo}-${prKey}`
+}
+
+const getReviewForCurrentWebSite = (tabUrl) => {
+  const prId = getPullRequestID(tabUrl)
+  if (!prId) return []
+  const state = JSON.parse(localStorage.getItem('state')) || {}
+
+  const { review } = Object.values(state).find(({id}) => id === prId) || {}
+  const key = buildKey()
+
+  if (review) {
+    return review
+  } else {
+    localStorage.setItem('state', JSON.stringify({...state, [key]: {id: prId, review: CHECK_LIST}}))
+    increaseActiveId()
+    return CHECK_LIST
+  }
+}
+
+const setReviewByURL = (tabUrl, review) => {
+  const prId = getPullRequestID(tabUrl)
+  if (!prId) return null
+
+  const state = JSON.parse(localStorage.getItem('state')) || {}
+  let [key] = Object.entries(state).find(([key, {id}]) => id === prId) || []
+
+  if (key) {
+    localStorage.setItem('state', JSON.stringify({...state, [key]: {id: prId, review}}))
+  } else {
+    localStorage.setItem('state', JSON.stringify({...state, [buildKey()]: {id: prId, review: review || CHECK_LIST}}))
+    increaseActiveId()
+  }
+}
+
 function App() {
-  const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('state')));
+  const [tabUrl, setTabUrl] = useState('')
+  useEffect(() => {
+    chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
+      setTabUrl(tabs[0].url)
+    });
+  }, [])
+
+  const [review, setReview] = useState([]);
+
+  useEffect(() => {
+    setReview(getReviewForCurrentWebSite(tabUrl))
+  }, [tabUrl, getReviewForCurrentWebSite])
+
   const [tab, setTab] = useState(window.localStorage.getItem('tab') || CHECK_LIST_TYPES.STYLE);
 
   function toggleTaskCompleted(id, e) {
-    const updatedTasks = tasks.map(task => {
+    const updatedTasks = review.map(task => {
       if (id === task.id) {
         return {...task, completedId: (task.completedId + 1) % CHECK_STATE_ARR.length}
       }
       return task;
     });
 
-    setTasks(updatedTasks);
-    localStorage.setItem('state', JSON.stringify(updatedTasks))
+    setReview(updatedTasks);
+    setReviewByURL(tabUrl, updatedTasks)
 
     if (e && e.target) {
       e.target.blur()
     }
   }
 
-  const taskList = tasks
+  const taskList = review
   .filter(TABS_MAP[tab])
   .map(task => (
     <Todo
@@ -70,9 +135,17 @@ function App() {
   const headingText = `${inProgressItems.length} ${itemsNoun} remaining`;
 
   const clearHandler = () => {
-    localStorage.setItem('state', JSON.stringify(CHECK_LIST))
-    setTasks(CHECK_LIST)
+    if (!getPullRequestID(tabUrl)) return
+    setReviewByURL(tabUrl, CHECK_LIST)
+    setReview(CHECK_LIST)
   }
+
+  useEffect(() => {
+    const activeId = +localStorage.getItem('activeId') || 0
+    if (activeId >= 500) {
+      localStorage.setItem('activeId', '1')
+    }
+  }, [])
 
   const handlers = {
     CLEAR_REVIEW: () => clearHandler(localStorage.getItem('activeReview') - 1),
@@ -106,19 +179,19 @@ function App() {
           <GlobalHotKeys handlers={handlers} keyMap={keyMap}/>
           <Form/>
           <div className="filters btn-group stack-exception">
-            { filterList }
+            {filterList}
           </div>
           <h2 id="list-heading" tabIndex="-1">
             {headingText}
           </h2>
           <ul
-            role="list"
-            className="todo-list stack-large stack-exception"
-            aria-labelledby="list-heading"
+              role="list"
+              className="todo-list stack-large stack-exception"
+              aria-labelledby="list-heading"
           >
-            { taskList }
+            {taskList}
           </ul>
-          <Counter tasks={tasks} onClear={clearHandler}/>
+          <Counter tasks={review} onClear={clearHandler}/>
           <ThemeToggle/>
         </div>
   );

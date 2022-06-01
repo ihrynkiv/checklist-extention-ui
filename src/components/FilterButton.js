@@ -3,7 +3,7 @@ import React from "react";
 function FilterButton({isPressed, name, setFilter}) {
   const handleFilterChange = () => {
     setFilter(name)
-    window.localStorage.setItem('tab', name)
+    localStorage.setItem('tab', name)
   }
 
   return (
