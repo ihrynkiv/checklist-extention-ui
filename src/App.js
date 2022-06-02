@@ -142,7 +142,7 @@ function App() {
 
   useEffect(() => {
     const activeId = +localStorage.getItem('activeId') || 0
-    if (activeId >= 500) {
+    if (activeId >= 25) {
       localStorage.setItem('activeId', '1')
     }
   }, [])
