@@ -2,6 +2,7 @@ import React, {useContext, useState} from "react";
 import { ThemeContext, themes } from '../contexts/ThemeContext';
 import DarkModeToggle from "react-dark-mode-toggle";
 import {GlobalHotKeys} from "react-hotkeys";
+import { ColorModeContext } from '../App';
 
 const THEMES = {
     DARK: 'dark',
@@ -12,12 +13,17 @@ const keyMap = { TOGGLE_THEME: ['t'] }
 
 export const ThemeToggle = () => {
     const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === THEMES.DARK)
+    const colorMode = useContext(ColorModeContext);
+
     const {changeTheme} = useContext(ThemeContext)
 
     const handleThemeChange = (isDark) => {
         setIsDarkMode(isDark)
         localStorage.setItem('theme', isDark ? THEMES.DARK : THEMES.LIGHT )
-        setTimeout(() => changeTheme(isDarkMode ? themes.light : themes.dark), 350)
+        setTimeout(() => {
+            changeTheme(isDarkMode ? themes.light : themes.dark)
+            colorMode.toggleColorMode()
+        }, 350)
     }
 
     const handlers = {

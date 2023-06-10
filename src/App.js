@@ -1,21 +1,40 @@
 /*global chrome*/
-import React, {useEffect, useState} from "react";
-import { GlobalHotKeys } from "react-hotkeys";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { GlobalHotKeys } from 'react-hotkeys';
 
-import Form from "./components/Form";
-import FilterButton from "./components/FilterButton";
-import Todo from "./components/Todo";
-import {CHECK_LIST, CHECK_LIST_TYPES, CHECK_STATE_ARR} from "./constants";
-import {Counter} from "./components/Counter";
-import {ThemeToggle} from "./components/ThemeToggle";
+import Form from './components/Form';
+import FilterButton from './components/FilterButton';
+import Todo from './components/Todo';
+import { CHECK_STATE_ARR } from './constants';
+import { Counter } from './components/Counter';
+import { ThemeToggle } from './components/ThemeToggle';
+import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
+import { Login } from './components/Login';
+import { Registration } from './components/Registration';
+import { NoopComponent } from './components/Noop';
+import { Navigation } from './components/Navigation';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useTheme } from '@mui/material';
+import { themes } from './contexts/ThemeContext';
+import { Settings } from './components/Settings';
+import { UpdateUserInfo } from './components/UpdateUserInfo';
+import { Configuration } from './components/Configuration';
+import { Edit } from './components/Edit';
+import { useDispatch, useSelector } from 'react-redux';
+import { whoAmIAction } from './store/auth/auth.slice';
+import { getAuth } from './store/auth/auth.selector';
+import { createReview, fetchReviews, updateReview } from './store/reviews/reviews.slice';
+import { selectReviews } from './store/reviews/review.selector';
+import { ReviewsList } from './components/ReviewsList';
 
-const TABS_MAP = {
-  Style: task => task.type === CHECK_LIST_TYPES.STYLE,
-  Solution: task => task.type === CHECK_LIST_TYPES.SOLUTION,
-  Tests: task => task.type === CHECK_LIST_TYPES.TESTS,
-};
+export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
-const TABS_NAMES = Object.keys(TABS_MAP);
+const STYLES = {
+  DARK_THEME: {
+    backgroundColor: '#1e1e1e',
+    color: '#eeeeee'
+  }
+}
 
 const keyMap = {
   CLEAR_REVIEW: ["del", "backspace"],
@@ -25,176 +44,261 @@ const keyMap = {
   CHECK_ITEM: ["1", "2", "3", "4", "5"]
 }
 
-const increaseActiveId = () => {
-  const activeId = +localStorage.getItem('activeId') || 0
-  localStorage.setItem('activeId', (activeId + 1).toString())
-}
-
-const buildKey = () => {
-  const activeId = +localStorage.getItem('activeId') || 0
-  return `key${activeId + 1}`
-}
-
 const getPullRequestID = (tabUrl) => {
   if (!tabUrl) return null
 
-  const {pathname} = new URL(tabUrl)
-  const [,,repo,,prKey] = pathname.split('/')
+  const url = new URL(tabUrl)
+  const [,account,repo,pull,prKey] = url?.pathname.split('/')
 
   if (!repo || !prKey) return null
-  return `${repo}-${prKey}`
+  return `${url.origin}/${account}/${repo}/${pull}/${prKey}`
 }
 
-const getReviewForCurrentWebSite = (tabUrl) => {
-  const prId = getPullRequestID(tabUrl)
-  if (!prId) return []
-  const state = JSON.parse(localStorage.getItem('state')) || {}
-
-  const { review } = Object.values(state).find(({id}) => id === prId) || {}
-  const key = buildKey()
-
-  if (review) {
-    return review
-  } else {
-    localStorage.setItem('state', JSON.stringify({...state, [key]: {id: prId, review: CHECK_LIST}}))
-    increaseActiveId()
-    return CHECK_LIST
-  }
-}
-
-const setReviewByURL = (tabUrl, review) => {
-  const prId = getPullRequestID(tabUrl)
-  if (!prId) return null
-
-  const state = JSON.parse(localStorage.getItem('state')) || {}
-  let [key] = Object.entries(state).find(([key, {id}]) => id === prId) || []
-
-  if (key) {
-    localStorage.setItem('state', JSON.stringify({...state, [key]: {id: prId, review}}))
-  } else {
-    localStorage.setItem('state', JSON.stringify({...state, [buildKey()]: {id: prId, review: review || CHECK_LIST}}))
-    increaseActiveId()
-  }
+const mapConfigurationToReview = (configuration) => {
+  return Object.entries(configuration).flatMap(([type, items]) => {
+    return items?.flatMap((name) => ({ id: name, name, type, completedId: 0 }))
+  })
 }
 
 function App() {
-  const [tabUrl, setTabUrl] = useState('')
-  useEffect(() => {
-    chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
-      setTabUrl(tabs[0].url)
-    });
-  }, [])
+  const [tab, setTab] = useState( '');
 
-  const [review, setReview] = useState([]);
+  // useEffect(() => {
+  //   setTabUrl('https://github.com/MackeyRMS/front-end/pull/3916/files')
+  // }, []);
 
-  useEffect(() => {
-    setReview(getReviewForCurrentWebSite(tabUrl))
-  }, [tabUrl, getReviewForCurrentWebSite])
 
-  const [tab, setTab] = useState(window.localStorage.getItem('tab') || CHECK_LIST_TYPES.STYLE);
+  const App = () => {
+    const [categories, setCategories] = useState([]);
+    const [tabUrl, setTabUrl] = useState('')
+    const [review, setReview] = useState([]);
+    const [checkList, setCheckList] = useState([]);
 
-  function toggleTaskCompleted(id, e) {
-    const updatedTasks = review.map(task => {
-      if (id === task.id) {
-        return {...task, completedId: (task.completedId + 1) % CHECK_STATE_ARR.length}
+    const history = useHistory();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      if (!tab && categories.length) {
+        setTab(categories?.[0])
       }
-      return task;
-    });
+    }, [categories]);
 
-    setReview(updatedTasks);
-    setReviewByURL(tabUrl, updatedTasks)
+    useEffect(() => {
+      dispatch(fetchReviews()).then((action) => {
+        if(action?.payload?.response?.status === 401 || action.error) {
+          history && history.push('/login')
+        }
+      })
+      dispatch(whoAmIAction()).then((action) => {
+        if(action?.payload?.response?.status === 401 || action.error) {
+          history && history.push('/login')
+        }
+      })
+    }, [dispatch, history])
 
-    if (e && e.target) {
-      e.target.blur()
+    const currentUser = useSelector(getAuth)
+    const reviews = useSelector(selectReviews)
+
+    useEffect(() => {
+      const prId = getPullRequestID(tabUrl)
+      const currentReview = reviews.find((review) => {
+        return review.prId === prId
+      })
+
+      if (!currentReview && prId && Object.keys(checkList).length) {
+        dispatch(createReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
+          .then((res) => {
+            if (res?.payload?.response?.status === 403) {
+              dispatch(updateReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
+            }
+          })
+      } else {
+        setReview(currentReview?.configuration || [])
+      }
+
+    }, [checkList, currentUser, dispatch, reviews, tabUrl])
+
+    useEffect(() => {
+      if (!checkList.length && currentUser) {
+        setCheckList(currentUser?.data?.configuration?.checkList || {})
+        setCategories(Object.keys(checkList) || [])
+      }
+    }, [checkList, currentUser])
+
+    useEffect(() => {
+      chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
+        console.log('tabs = ', tabs)
+        console.log('tabs[0] = ', tabs[0])
+        const url = new URL(tabs[0].url)
+        console.log('url = ', url)
+        if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
+          console.log('return ');
+        }
+          setTabUrl(tabs[0].url)
+      });
+    }, [])
+
+    const setReviewByUrl = useCallback((tabUrl, configuration) => {
+      const prId = getPullRequestID(tabUrl)
+      if (!prId) return null
+
+      dispatch(updateReview({prId, configuration }))
+    }, [dispatch])
+
+    const toggleTaskCompleted = useCallback((id, e) => {
+      const updatedTasks = review.map(task => {
+        if (id === task.id) {
+          return {...task, completedId: (task.completedId + 1) % CHECK_STATE_ARR.length}
+        }
+        return task;
+      });
+
+      setReview(updatedTasks);
+      setReviewByUrl(tabUrl, updatedTasks)
+
+      if (e && e.target) {
+        e.target.blur()
+      }
+    }, [review, setReviewByUrl, tabUrl])
+
+    const taskList = useMemo(() => {
+      return review?.filter?.((item) => item?.type === tab)
+        .map(task => (
+          <Todo
+            id={task.id}
+            name={task.name}
+            completed={task.completedId}
+            key={`${task.id}`}
+            toggleTaskCompleted={toggleTaskCompleted}
+          />
+        ));
+    }, [review, toggleTaskCompleted])
+
+
+    const filterList = useMemo(() => {
+      return categories?.map(name => (
+        <FilterButton
+          key={name}
+          name={name}
+          isPressed={name === tab}
+          setFilter={setTab}
+        />
+      ));
+    }, [categories])
+
+    const inProgressItems = taskList?.filter(task => !task.props.completed) || []
+    const itemsNoun = inProgressItems?.length !== 1 ? 'items' : 'item';
+    const headingText = `${inProgressItems?.length} ${itemsNoun} remaining`;
+
+    const clearHandler = () => {
+      if (!getPullRequestID(tabUrl)) return
+      setReviewByUrl(tabUrl, mapConfigurationToReview(checkList))
     }
+
+    const handlers = {
+      CLEAR_REVIEW: clearHandler,
+      RIGHT: () => {
+        const activeTabIndex = categories.indexOf(tab)
+        console.log({activeTabIndex, categories});
+        const newTab = categories[(activeTabIndex + 1) % categories.length]
+
+        setTab(newTab)
+      },
+      LEFT: () => {
+        const activeTabIndex = categories.indexOf(tab)
+        const newTab = categories[activeTabIndex - 1 < 0 ? categories.length - 1 : activeTabIndex - 1]
+
+        setTab(newTab)
+      },
+      CHECK_ITEM: (e) => {
+        const num = +e.code.match(/\d+/g)
+        if (isNaN(num)) return null
+
+        const checkbox = document.querySelectorAll('.todo')?.[num - 1]?.querySelector('input[type="checkbox"]')
+        checkbox && checkbox.click()
+      }
+    };
+
+    //
+
+    const theme = useTheme()
+    const isDarkMode = theme.palette.mode === 'dark'
+    const styles = isDarkMode ? STYLES.DARK_THEME : {}
+
+    return (
+      <div style={styles} className="todoapp stack-large" key={window.location.href}>
+        <GlobalHotKeys handlers={handlers} keyMap={keyMap}/>
+        <Form/>
+        <div className="filters btn-group stack-exception">
+          {filterList}
+        </div>
+        <h2 id="list-heading" tabIndex="-1">
+          {headingText}
+        </h2>
+        <ul
+          className="todo-list stack-large stack-exception"
+          aria-labelledby="list-heading"
+        >
+          {taskList}
+        </ul>
+        <Counter tasks={review} onClear={clearHandler}/>
+      </div>
+    )
   }
-
-  const taskList = review
-  .filter(TABS_MAP[tab])
-  .map(task => (
-    <Todo
-      id={task.id}
-      name={task.name}
-      completed={task.completedId}
-      key={`${task.id}`}
-      toggleTaskCompleted={toggleTaskCompleted}
-    />
-  ));
-
-  const filterList = TABS_NAMES.map(name => (
-    <FilterButton
-      key={name}
-      name={name}
-      isPressed={name === tab}
-      setFilter={setTab}
-    />
-  ));
-
-  const inProgressItems = taskList.filter(task => !task.props.completed)
-  const itemsNoun = inProgressItems.length !== 1 ? 'items' : 'item';
-  const headingText = `${inProgressItems.length} ${itemsNoun} remaining`;
-
-  const clearHandler = () => {
-    if (!getPullRequestID(tabUrl)) return
-    setReviewByURL(tabUrl, CHECK_LIST)
-    setReview(CHECK_LIST)
-  }
-
-  useEffect(() => {
-    const activeId = +localStorage.getItem('activeId') || 0
-    if (activeId >= 25) {
-      localStorage.setItem('activeId', '1')
-    }
-  }, [])
-
-  const handlers = {
-    CLEAR_REVIEW: () => clearHandler(localStorage.getItem('activeReview') - 1),
-    RIGHT: () => {
-      const currentTab = localStorage.getItem('tab') || tab
-      const activeTabIndex = TABS_NAMES.indexOf(currentTab)
-      const newTab = TABS_NAMES[(activeTabIndex + 1) % TABS_NAMES.length]
-
-      localStorage.setItem('tab', newTab)
-      setTab(newTab)
-    },
-    LEFT: () => {
-      const currentTab = localStorage.getItem('tab') || tab
-      const activeTabIndex = TABS_NAMES.indexOf(currentTab)
-      const newTab = TABS_NAMES[activeTabIndex - 1 < 0 ? TABS_NAMES.length - 1 : activeTabIndex - 1]
-
-      localStorage.setItem('tab', newTab)
-      setTab(newTab)
-    },
-    CHECK_ITEM: (e) => {
-      const num = +e.code.match(/\d+/g)
-      if (isNaN(num)) return null
-
-      const checkbox = document.querySelectorAll('.todo')?.[num - 1]?.querySelector('input[type="checkbox"]')
-      checkbox && checkbox.click()
-    }
-  };
 
   return (
-        <div className="todoapp stack-large" key={window.location.href}>
-          <GlobalHotKeys handlers={handlers} keyMap={keyMap}/>
-          <Form/>
-          <div className="filters btn-group stack-exception">
-            {filterList}
-          </div>
-          <h2 id="list-heading" tabIndex="-1">
-            {headingText}
-          </h2>
-          <ul
-              role="list"
-              className="todo-list stack-large stack-exception"
-              aria-labelledby="list-heading"
-          >
-            {taskList}
-          </ul>
-          <Counter tasks={review} onClear={clearHandler}/>
-          <ThemeToggle/>
-        </div>
+    <div id="content">
+      <BrowserRouter>
+        <ThemeToggle/>
+        <Switch>
+          <Route exact path="/" component={App}/>
+          <Route exact path="/review" component={App}/>
+          <Route exact path="/index.html" component={App}/>
+          <Route exact path="/login" component={Login}/>
+          <Route exact path="/registration" component={Registration}/>
+          <Route exact path="/settings" component={Settings}/>
+          <Route exact path="/edit" component={Edit}/>
+          <Route exact path="/list" component={ReviewsList}/>
+          <Route exact path="/configuration" component={Configuration}/>
+          <Route exact path="/update-user-info" component={UpdateUserInfo}/>
+        </Switch>
+
+        <Switch>
+          <Route exact path="/login" component={NoopComponent}/>
+          <Route exact path="/registration" component={NoopComponent}/>
+          <Route path="/" component={Navigation}/>
+        </Switch>
+      </BrowserRouter>
+    </div>
   );
 }
 
-export default App;
+export default function ToggleColorMode() {
+  const [mode, setMode] = React.useState(window.localStorage.getItem('theme') || themes.light);
+  const colorMode = React.useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === themes.light ? themes.dark : themes.light));
+      },
+    }),
+    [],
+  );
+
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+        },
+      }),
+    [mode],
+  );
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <App/>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
+  );
+}

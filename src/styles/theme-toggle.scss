@@ -1,7 +1,8 @@
 .switch {
   position: fixed;
-  top: 13px;
+  top: 42px;
   right: 25px;
+  display:  none;
 
   & input[type="checkbox"] {
     visibility: hidden;
