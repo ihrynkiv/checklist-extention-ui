@@ -62,6 +62,68 @@ const mapConfigurationToReview = (configuration) => {
 
 function App() {
   const [tab, setTab] = useState( '');
+  const [categories, setCategories] = useState([]);
+  const [tabUrl, setTabUrl] = useState('')
+  const [review, setReview] = useState([]);
+  const [checkList, setCheckList] = useState([]);
+
+  const history = useHistory();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!tab && categories.length) {
+      setTab(categories?.[0])
+    }
+  }, [categories, tab]);
+
+  useEffect(() => {
+    dispatch(fetchReviews()).then((action) => {
+      if(action?.payload?.response?.status === 401 || action.error) {
+        history && history.push('/login')
+      }
+    })
+    dispatch(whoAmIAction()).then((action) => {
+      if(action?.payload?.response?.status === 401 || action.error) {
+        history && history.push('/login')
+      }
+    })
+  }, [dispatch, history])
+
+  const currentUser = useSelector(getAuth)
+  const reviews = useSelector(selectReviews)
+
+  useEffect(() => {
+    const prId = getPullRequestID(tabUrl)
+    const currentReview = reviews.find((review) => {
+      return review.prId === prId
+    })
+
+    if (!currentReview && prId && Object.keys(checkList).length) {
+      dispatch(createReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
+        .then((res) => {
+          if (res?.payload?.response?.status === 403) {
+            dispatch(updateReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
+          }
+        })
+    } else {
+      setReview(currentReview?.configuration || [])
+    }
+
+  }, [checkList, currentUser, dispatch, reviews, tabUrl])
+
+  useEffect(() => {
+    if (!checkList.length && currentUser) {
+      setCheckList(currentUser?.data?.configuration?.checkList || {})
+      setCategories(Object.keys(checkList) || [])
+    }
+  }, [checkList, currentUser])
+
+  const setReviewByUrl = useCallback((tabUrl, configuration) => {
+    const prId = getPullRequestID(tabUrl)
+    if (!prId) return null
+
+    dispatch(updateReview({prId, configuration }))
+  }, [dispatch])
 
   // useEffect(() => {
   //   setTabUrl('https://github.com/MackeyRMS/front-end/pull/3916/files')
@@ -69,81 +131,20 @@ function App() {
 
 
   const App = () => {
-    const [categories, setCategories] = useState([]);
-    const [tabUrl, setTabUrl] = useState('')
-    const [review, setReview] = useState([]);
-    const [checkList, setCheckList] = useState([]);
-
-    const history = useHistory();
-    const dispatch = useDispatch();
-
     useEffect(() => {
-      if (!tab && categories.length) {
-        setTab(categories?.[0])
-      }
-    }, [categories]);
-
-    useEffect(() => {
-      dispatch(fetchReviews()).then((action) => {
-        if(action?.payload?.response?.status === 401 || action.error) {
-          history && history.push('/login')
-        }
-      })
-      dispatch(whoAmIAction()).then((action) => {
-        if(action?.payload?.response?.status === 401 || action.error) {
-          history && history.push('/login')
-        }
-      })
-    }, [dispatch, history])
-
-    const currentUser = useSelector(getAuth)
-    const reviews = useSelector(selectReviews)
-
-    useEffect(() => {
-      const prId = getPullRequestID(tabUrl)
-      const currentReview = reviews.find((review) => {
-        return review.prId === prId
-      })
-
-      if (!currentReview && prId && Object.keys(checkList).length) {
-        dispatch(createReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
-          .then((res) => {
-            if (res?.payload?.response?.status === 403) {
-              dispatch(updateReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
-            }
-          })
-      } else {
-        setReview(currentReview?.configuration || [])
-      }
-
-    }, [checkList, currentUser, dispatch, reviews, tabUrl])
-
-    useEffect(() => {
-      if (!checkList.length && currentUser) {
-        setCheckList(currentUser?.data?.configuration?.checkList || {})
-        setCategories(Object.keys(checkList) || [])
-      }
-    }, [checkList, currentUser])
-
-    useEffect(() => {
-      chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
-        console.log('tabs = ', tabs)
-        console.log('tabs[0] = ', tabs[0])
-        const url = new URL(tabs[0].url)
-        console.log('url = ', url)
-        if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
-          console.log('return ');
-        }
+      if(!tabUrl) {
+        chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
+          console.log('tabs = ', tabs)
+          console.log('tabs[0] = ', tabs[0])
+          const url = new URL(tabs[0].url)
+          console.log('url = ', url)
+          if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
+            console.log('return ');
+          }
           setTabUrl(tabs[0].url)
-      });
+        });
+      }
     }, [])
-
-    const setReviewByUrl = useCallback((tabUrl, configuration) => {
-      const prId = getPullRequestID(tabUrl)
-      if (!prId) return null
-
-      dispatch(updateReview({prId, configuration }))
-    }, [dispatch])
 
     const toggleTaskCompleted = useCallback((id, e) => {
       const updatedTasks = review.map(task => {
@@ -159,7 +160,7 @@ function App() {
       if (e && e.target) {
         e.target.blur()
       }
-    }, [review, setReviewByUrl, tabUrl])
+    }, [])
 
     const taskList = useMemo(() => {
       return review?.filter?.((item) => item?.type === tab)
@@ -172,7 +173,7 @@ function App() {
             toggleTaskCompleted={toggleTaskCompleted}
           />
         ));
-    }, [review, toggleTaskCompleted])
+    }, [toggleTaskCompleted])
 
 
     const filterList = useMemo(() => {
@@ -184,7 +185,7 @@ function App() {
           setFilter={setTab}
         />
       ));
-    }, [categories])
+    }, [])
 
     const inProgressItems = taskList?.filter(task => !task.props.completed) || []
     const itemsNoun = inProgressItems?.length !== 1 ? 'items' : 'item';
