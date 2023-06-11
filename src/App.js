@@ -41,7 +41,7 @@ const keyMap = {
   DELETE_REVIEW: ["shift+del", "shift+backspace"],
   RIGHT: ["right", "d", "l"],
   LEFT: ["left", "a", "h"],
-  CHECK_ITEM: ["1", "2", "3", "4", "5"]
+  CHECK_ITEM: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 }
 
 const getPullRequestID = (tabUrl) => {
@@ -65,7 +65,7 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [tabUrl, setTabUrl] = useState('')
   const [review, setReview] = useState([]);
-  const [checkList, setCheckList] = useState([]);
+  const [checkList, setCheckList] = useState(null);
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -98,7 +98,7 @@ function App() {
       return review.prId === prId
     })
 
-    if (!currentReview && prId && Object.keys(checkList).length) {
+    if (!currentReview && prId && checkList !== null && Object.keys(checkList).length) {
       dispatch(createReview({ prId, configuration: mapConfigurationToReview(checkList), userId: currentUser?.data?.id }))
         .then((res) => {
           if (res?.payload?.response?.status === 403) {
@@ -112,9 +112,9 @@ function App() {
   }, [checkList, currentUser, dispatch, reviews, tabUrl])
 
   useEffect(() => {
-    if (!checkList.length && currentUser) {
+    if (checkList === null && Object.values(currentUser?.data || {})?.length) {
       setCheckList(currentUser?.data?.configuration?.checkList || {})
-      setCategories(Object.keys(checkList) || [])
+      setCategories(Object.keys(currentUser?.data?.configuration?.checkList || {}) || [])
     }
   }, [checkList, currentUser])
 
@@ -125,26 +125,24 @@ function App() {
     dispatch(updateReview({prId, configuration }))
   }, [dispatch])
 
-  // useEffect(() => {
-  //   setTabUrl('https://github.com/MackeyRMS/front-end/pull/3916/files')
-  // }, []);
-
 
   const App = () => {
     useEffect(() => {
       if(!tabUrl) {
-        chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
-          console.log('tabs = ', tabs)
-          console.log('tabs[0] = ', tabs[0])
-          const url = new URL(tabs[0].url)
-          console.log('url = ', url)
-          if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
-            console.log('return ');
-          }
-          setTabUrl(tabs[0].url)
-        });
+        setTabUrl('https://github.com/MackeyRMS/front-end/pull/3916/files')
       }
-    }, [])
+    }, []);
+
+    // useEffect(() => {
+    //   if(!tabUrl) {
+    //     chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
+    //       const url = new URL(tabs[0].url)
+    //       if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
+    //         setTabUrl(tabs[0].url)
+    //       }
+    //     });
+    //   }
+    // }, [])
 
     const toggleTaskCompleted = useCallback((id, e) => {
       const updatedTasks = review.map(task => {
@@ -193,7 +191,7 @@ function App() {
 
     const clearHandler = () => {
       if (!getPullRequestID(tabUrl)) return
-      setReviewByUrl(tabUrl, mapConfigurationToReview(checkList))
+      setReviewByUrl(tabUrl, mapConfigurationToReview(checkList || {}))
     }
 
     const handlers = {

@@ -35,8 +35,8 @@ export const Settings = () => {
           p: 3,
         }}
       >
-        Update user info
-        <IconButton sx={{ ml: 1 }} color="inherit" onClick={() => history.push('/update-user-info')}>
+        Змінити дані користувача
+        <IconButton sx={{ ml: 1 }} color={"secondary"} onClick={() => history.push('/update-user-info')}>
           <AccountCircleIcon />
         </IconButton>
       </Box>
@@ -52,8 +52,8 @@ export const Settings = () => {
           p: 3,
         }}
       >
-        Logout
-        <IconButton sx={{ ml: 1 }} color="inherit" onClick={logoutHandler}>
+        Вихід
+        <IconButton sx={{ ml: 1 }} color={"error"} onClick={logoutHandler}>
           <LogoutIcon/>
         </IconButton>
       </Box>

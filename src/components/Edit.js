@@ -94,8 +94,9 @@ export const Edit = () => {
           <>
             <TextField
             id="catagory"
-            label="Catagory"
+            label="Категорія"
             variant="outlined"
+            color={"secondary"}
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
             fullWidth
@@ -104,11 +105,12 @@ export const Edit = () => {
           />
             <Button
               variant="contained"
+              color={"secondary"}
               style={STYLES.addBtn}
               endIcon={<DriveFileRenameOutlineOutlinedIcon />}
               onClick={handleRename}
             >
-              Rename
+              Зберегти
             </Button>
           </>
           :
@@ -120,7 +122,8 @@ export const Edit = () => {
                   edge="end"
                   aria-label="Edit"
                   style={STYLES.btn}
-                  title="Edit"
+                  color={"secondary"}
+                  title="Редагувати"
                   onClick={() => setCategoryToRename(true)}
                 >
                   <EditIcon />
@@ -132,7 +135,7 @@ export const Edit = () => {
           }
       </div>
 
-      <List style={{overflow: 'scroll', height: '450px'}}>
+      <List style={{overflow: 'scroll', height: '320px'}}>
         {
           items?.length ? items.map((item) => {
             return (
@@ -140,9 +143,10 @@ export const Edit = () => {
                 <div style={STYLES.form} key={item}>
                   <TextField
                     id="rename"
-                    label="Rename"
+                    label="Перейменувати"
                     variant="outlined"
                     value={rename}
+                    color={"secondary"}
                     onChange={(e) => setRename(e.target.value)}
                     fullWidth
                     margin="normal"
@@ -150,11 +154,12 @@ export const Edit = () => {
                   />
                   <Button
                     variant="contained"
+                    color={"secondary"}
                     style={STYLES.addBtn}
                     endIcon={<DriveFileRenameOutlineOutlinedIcon />}
                     onClick={handleRenameItem}
                   >
-                    Rename
+                    Зберегти
                   </Button>
                 </div> :
                 <ListItem
@@ -165,7 +170,8 @@ export const Edit = () => {
                         edge="end"
                         aria-label="Edit"
                         style={STYLES.btn}
-                        title="Edit"
+                        title="Редагувати"
+                        color={"secondary"}
                         onClick={() => {
                           setItemToRename(item)
                           setRename(item)
@@ -177,8 +183,9 @@ export const Edit = () => {
                       <IconButton
                         edge="end"
                         aria-label="Delete"
+                        color={"secondary"}
                         style={STYLES.btn}
-                        title="Delete"
+                        title="Видалити"
                         onClick={() => handleDelete(item)}
                       >
                         <DeleteIcon />
@@ -197,6 +204,7 @@ export const Edit = () => {
         <TextField
           id="name"
           label="Name"
+          color={"secondary"}
           variant="outlined"
           value={item}
           onChange={(e) => setItem(e.target.value)}
@@ -207,10 +215,11 @@ export const Edit = () => {
         <Button
           variant="contained"
           style={STYLES.addBtn}
+          color={"secondary"}
           endIcon={<AddCircleIcon />}
           onClick={handleCreateItem}
         >
-          Create Item
+          Створити запис
         </Button>
       </div>
     </>

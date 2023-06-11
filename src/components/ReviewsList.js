@@ -51,7 +51,8 @@ export const ReviewsList = () => {
                   edge="end"
                   aria-label="Delete"
                   style={STYLES.btn}
-                  title="Delete"
+                  title="Видалити"
+                  color={"secondary"}
                   onClick={() => handleDelete(prId)}
                 >
                   <DeleteIcon />

@@ -5,8 +5,34 @@ html {
   font: 60% / 1.15 sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
-  width: 580px;
+  width: 396px;
+  height: 500px;
+  position: relative;
+}
+
+#root {
+  height: 500px;
+}
+
+#content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.App {
+  height: 500px;
+}
+
+
+body {
+  //width: 580px;
   position: relative;
   margin: 0 auto;
   font: 1.5rem/1.25 Arial, sans-serif;
@@ -127,3 +153,16 @@ input[type="text"] {
   }
 }
 
+#configuration {
+  height: 375px;
+}
+
+.MuiListItemText-root {
+  .MuiTypography-root {
+    font-size: 1.5rem;
+  }
+}
+
+.MuiOutlinedInput-root, .MuiInputBase-root {
+  font-size: 1.5rem;
+}

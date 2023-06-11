@@ -27,7 +27,7 @@ const defaultError = {
   rePassword: noError
 }
 
-const defaultErrorMessage = 'something went wrong';
+const defaultErrorMessage = 'Щось пішло не так';
 
 export const Registration = () => {
   const [username, setUsername] = useState('')
@@ -113,7 +113,7 @@ export const Registration = () => {
     <div style={STYLES.mainBlock}>
       <TextField
         id="userName"
-        label="Username or email"
+        label="Логін або емейл"
         variant="outlined"
         error={error.userName.hasError}
         helperText={error.userName.helperText}
@@ -124,7 +124,7 @@ export const Registration = () => {
         styles={STYLES.textField}/>
       <TextField
         id="password"
-        label="Password"
+        label="Пароль"
         variant="outlined"
         error={error.password.hasError}
         helperText={error.password.helperText}
@@ -150,7 +150,7 @@ export const Registration = () => {
       />
       <TextField
         id="re-password"
-        label="Repeat password"
+        label="Повторіть пароль"
         variant="outlined"
         error={error.rePassword.hasError}
         helperText={error.rePassword.helperText}
@@ -175,10 +175,10 @@ export const Registration = () => {
         }}
       />
       <div style={STYLES.btnBlock}>
-        <Button variant="contained" style={STYLES.btn} onClick={registrationClickHandler}>
-          Registration
+        <Button variant="contained" style={STYLES.btn} onClick={registrationClickHandler} color={"secondary"}>
+          Реєстрація
         </Button>
-        <Button onClick={() => history.push('/login')}>Login</Button>
+        <Button color={"secondary"} onClick={() => history.push('/login')}>Login</Button>
       </div>
       <Toast message={message} open={open} setOpen={setOpen}/>
     </div>

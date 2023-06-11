@@ -41,10 +41,10 @@ export const Navigation = () => {
           setValue(newValue);
         }}
       >
-        <BottomNavigationAction label="Review" icon={<FactCheckIcon />} onClick={() => navigationHandle('/review')}/>
-        <BottomNavigationAction label="List" icon={<SourceIcon />} onClick={() => navigationHandle('/list')}/>
-        <BottomNavigationAction label="Configuration" icon={<MenuBookIcon />} onClick={() => navigationHandle('/configuration')}/>
-        <BottomNavigationAction label="Settings" icon={<SettingsIcon />} onClick={() => navigationHandle('/settings')}/>
+        <BottomNavigationAction label="Чекліст" icon={<FactCheckIcon />} onClick={() => navigationHandle('/review')}/>
+        <BottomNavigationAction label="Список" icon={<SourceIcon />} onClick={() => navigationHandle('/list')}/>
+        <BottomNavigationAction label="Конфігурація" icon={<MenuBookIcon />} onClick={() => navigationHandle('/configuration')}/>
+        <BottomNavigationAction label="Налаштування" icon={<SettingsIcon />} onClick={() => navigationHandle('/settings')}/>
       </BottomNavigation>
   );
 }

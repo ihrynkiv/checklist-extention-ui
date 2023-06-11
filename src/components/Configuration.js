@@ -70,8 +70,8 @@ export const Configuration = () => {
   }
 
   return (
-    <>
-    <List style={{overflow: 'scroll', height: '450px'}}>
+    <div id="configuration">
+    <List style={{overflow: 'scroll', height: '100%'}}>
       {
         categories.length ? categories.map((item) => {
           return (
@@ -82,8 +82,9 @@ export const Configuration = () => {
                   <IconButton
                     edge="end"
                     aria-label="Edit"
+                    color={"secondary"}
                     style={STYLES.btn}
-                    title="Edit"
+                    title="Редагувати"
                     onClick={() => handleEdit(item)}
                   >
                     <EditIcon/>
@@ -92,8 +93,9 @@ export const Configuration = () => {
                 <IconButton
                   edge="end"
                   aria-label="Delete"
+                  color={"secondary"}
                   style={STYLES.btn}
-                  title="Delete"
+                  title="Видалити"
                   onClick={() => handleDelete(item)}
                 >
                   <DeleteIcon />
@@ -111,7 +113,8 @@ export const Configuration = () => {
       <div style={STYLES.form}>
         <TextField
           id="name"
-          label="Name"
+          label="Назва"
+          color={"secondary"}
           variant="outlined"
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
@@ -121,14 +124,15 @@ export const Configuration = () => {
         />
         <Button
           variant="contained"
+          color={"secondary"}
           style={STYLES.addBtn}
           endIcon={<AddCircleIcon />}
           onClick={handleCreate}
         >
-          Create
+          Створити категорію
         </Button>
       </div>
-      <Toast message={'Category Name is already Taken'} open={open} setOpen={setOpen}/>
-  </>
+      <Toast message={'Назва категорії уже зайнята'} open={open} setOpen={setOpen}/>
+  </div>
   )
 }

@@ -64,8 +64,9 @@ export const Login = () => {
     <div style={STYLES.mainBlock}>
       <TextField
         id="userName"
-        label="Username or email"
+        label="Логін або емейл"
         variant="outlined"
+        color={"secondary"}
         fullWidth
         margin="normal"
         value={username}
@@ -75,7 +76,8 @@ export const Login = () => {
         error={error.password.hasError}
         helperText={error.password.helperText}
         id="password"
-        label="Password"
+        label="Пароль"
+        color={"secondary"}
         variant="outlined"
         fullWidth
         margin="normal"
@@ -98,12 +100,12 @@ export const Login = () => {
         }}
       />
       <div style={STYLES.btnBlock}>
-        <Button variant="contained" style={STYLES.btn} onClick={loginClickHandler}>
-          Login
+        <Button variant="contained" style={STYLES.btn} onClick={loginClickHandler} color={"secondary"}>
+          Вхід
         </Button>
-        <Button onClick={() => history.push("/registration")}>Registration</Button>
+        <Button color={"secondary"} onClick={() => history.push("/registration")}>Registration</Button>
       </div>
-      <Toast message="Wrong username or password" open={open} setOpen={setOpen}/>
+      <Toast message="Неправильний логін або пароль" open={open} setOpen={setOpen}/>
     </div>
   )
 }

@@ -29,7 +29,8 @@
   padding: .7rem 1rem;
   position: relative;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2.5rem 5rem 0 rgba(0, 0, 0, 0.1);
-  min-height: calc(100vh - 12rem);
+  min-height: 400px;
+  overflow: scroll;
 
   & > * {
     max-width: 70rem;
@@ -52,7 +53,11 @@
 
 @media screen and (min-width: 550px) {
   .todoapp {
-    padding: 3rem 4rem;
-    height: 480px;
+    padding: 1rem 2rem;
+    height: 435px;
   }
+}
+
+#list-heading {
+  text-align: center;
 }

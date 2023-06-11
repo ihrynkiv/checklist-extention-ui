@@ -14,7 +14,7 @@ const STYLES = {
   }
 }
 
-export const NoItems = ({message = 'There are no Items'}) => {
+export const NoItems = ({message = 'Немає даних'}) => {
   return (
     <div style={STYLES.wrapper}>
       <Typography

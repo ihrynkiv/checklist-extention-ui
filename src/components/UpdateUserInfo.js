@@ -46,7 +46,7 @@ export const UpdateUserInfo = () => {
 
   const passwordValidation = (value) => {
     if (value.length < 6) {
-      setError({...error, password: {hasError: true, helperText: 'password should contain at least 6 characters'}})
+      setError({...error, password: {hasError: true, helperText: 'Пароль має містити мінімум 6 символів'}})
     } else {
       setError({...error, password: noError})
     }
@@ -59,7 +59,7 @@ export const UpdateUserInfo = () => {
 
   const rePasswordValidation = (value) => {
     if (value.length < 6) {
-      setError({...error, rePassword: {hasError: true, helperText: 'password should contain at least 6 characters'}})
+      setError({...error, rePassword: {hasError: true, helperText: 'Пароль має містити мінімум 6 символів'}})
     } else {
       setError({...error, rePassword: noError})
     }
@@ -72,7 +72,7 @@ export const UpdateUserInfo = () => {
 
   const updatePasswordClickHandler = () => {
     if (password !== rePassword) {
-      setMessage("passwords doesnt match")
+      setMessage("Паролі не співпадають")
       setOpen(true)
       return
     }
@@ -87,7 +87,7 @@ export const UpdateUserInfo = () => {
         setMessage(res.payload?.response?.data?.title || defaultErrorMessage)
         setOpen(true)
       } else {
-        setMessage('Password was updated')
+        setMessage('Пароль змінено успішно')
         setOpen(true)
         history.push('/settings')
       }
@@ -106,7 +106,8 @@ export const UpdateUserInfo = () => {
     <div style={STYLES.mainBlock}>
       <TextField
         id="old-password"
-        label="Old Password"
+        label="Старий пароль"
+        color={"secondary"}
         variant="outlined"
         error={error.oldPassword.hasError}
         helperText={error.oldPassword.helperText}
@@ -132,7 +133,8 @@ export const UpdateUserInfo = () => {
       />
       <TextField
         id="password"
-        label="Password"
+        label="Новий пароль"
+        color={"secondary"}
         variant="outlined"
         error={error.password.hasError}
         helperText={error.password.helperText}
@@ -158,7 +160,8 @@ export const UpdateUserInfo = () => {
       />
       <TextField
         id="re-password"
-        label="Repeat password"
+        label="Повторіть новий пароль"
+        color={"secondary"}
         variant="outlined"
         error={error.rePassword.hasError}
         helperText={error.rePassword.helperText}
@@ -183,10 +186,10 @@ export const UpdateUserInfo = () => {
         }}
       />
       <div style={STYLES.btnBlock}>
-        <Button variant="contained" style={STYLES.btn}  endIcon={<SaveIcon/>} onClick={updatePasswordClickHandler}>
-          Update Password
+        <Button variant="contained" color={"secondary"} style={STYLES.btn}  endIcon={<SaveIcon/>} onClick={updatePasswordClickHandler}>
+          Змінити пароль
         </Button>
-        <Button color='secondary' endIcon={<CancelIcon/>} onClick={() => history.push('/settings')}>Cancel</Button>
+        <Button color={"error"} endIcon={<CancelIcon/>} onClick={() => history.push('/settings')}>Скасувати</Button>
       </div>
       <Toast message={message} open={open} setOpen={setOpen}/>
     </div>
