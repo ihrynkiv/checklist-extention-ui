@@ -13,7 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const STYLES = {
   btn: {margin: '0 1px'},
   form: {display: 'flex', height: '45px', marginBottom: '7px'},
-  textField: { margin: '0' },
+  textField: { margin: '0 0 0 5px' },
   addBtn: { margin: '0 8px' },
 }
 

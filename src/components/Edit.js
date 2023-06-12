@@ -12,7 +12,7 @@ import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRen
 const STYLES = {
   btn: {margin: '0 1px'},
   form: {display: 'flex', height: '45px', marginBottom: '7px'},
-  textField: { margin: '0' },
+  textField: {  margin: '0 0 0 5px' },
   addBtn: { margin: '0 8px' },
   title: {fontWeight: 'bold', fontSize: '30px'}
 }
@@ -135,7 +135,7 @@ export const Edit = () => {
           }
       </div>
 
-      <List style={{overflow: 'scroll', height: '320px'}}>
+      <List style={{overflow: 'scroll', height: '375px'}}>
         {
           items?.length ? items.map((item) => {
             return (

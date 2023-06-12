@@ -1,5 +1,5 @@
 {
-  "name": "Verity CheckList",
+  "name": "PR Review CheckList",
   "version": "1.0",
   "manifest_version": 2,
   "browser_action": {
@@ -16,5 +16,5 @@
     "scripting",
     "unlimitedStorage"
   ],
-  "content_security_policy": "script-src 'self' 'sha256-8CiWpPj6CAEN+Y2qFNBi8DnTt4/2wWCEqt/kIZLLPB0='"
+  "content_security_policy": "script-src 'self' 'sha256-YRr9xKdje9yjWhuwzjVVyUpalr/+upulEbJX7QhggMA='"
 }

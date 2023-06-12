@@ -129,20 +129,14 @@ function App() {
   const App = () => {
     useEffect(() => {
       if(!tabUrl) {
-        setTabUrl('https://github.com/MackeyRMS/front-end/pull/3916/files')
+        chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
+          const url = new URL(tabs[0].url)
+          if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
+            setTabUrl(tabs[0].url)
+          }
+        });
       }
-    }, []);
-
-    // useEffect(() => {
-    //   if(!tabUrl) {
-    //     chrome.tabs.query({currentWindow: true, active: true}, async function (tabs) {
-    //       const url = new URL(tabs[0].url)
-    //       if (url?.origin.includes("github") || url?.origin.includes("gitlab")) {
-    //         setTabUrl(tabs[0].url)
-    //       }
-    //     });
-    //   }
-    // }, [])
+    }, [])
 
     const toggleTaskCompleted = useCallback((id, e) => {
       const updatedTasks = review.map(task => {
@@ -186,8 +180,7 @@ function App() {
     }, [])
 
     const inProgressItems = taskList?.filter(task => !task.props.completed) || []
-    const itemsNoun = inProgressItems?.length !== 1 ? 'items' : 'item';
-    const headingText = `${inProgressItems?.length} ${itemsNoun} remaining`;
+    const headingText = `Залишилось пунктів: ${inProgressItems?.length}`;
 
     const clearHandler = () => {
       if (!getPullRequestID(tabUrl)) return
@@ -198,7 +191,6 @@ function App() {
       CLEAR_REVIEW: clearHandler,
       RIGHT: () => {
         const activeTabIndex = categories.indexOf(tab)
-        console.log({activeTabIndex, categories});
         const newTab = categories[(activeTabIndex + 1) % categories.length]
 
         setTab(newTab)

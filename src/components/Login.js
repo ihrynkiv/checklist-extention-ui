@@ -103,7 +103,7 @@ export const Login = () => {
         <Button variant="contained" style={STYLES.btn} onClick={loginClickHandler} color={"secondary"}>
           Вхід
         </Button>
-        <Button color={"secondary"} onClick={() => history.push("/registration")}>Registration</Button>
+        <Button color={"secondary"} onClick={() => history.push("/registration")}>Реєстрація</Button>
       </div>
       <Toast message="Неправильний логін або пароль" open={open} setOpen={setOpen}/>
     </div>

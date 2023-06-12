@@ -11,12 +11,12 @@ html {
 
 body {
   width: 396px;
-  height: 500px;
+  height: 555px;
   position: relative;
 }
 
 #root {
-  height: 500px;
+  height: 555px;
 }
 
 #content {
@@ -27,7 +27,7 @@ body {
 }
 
 .App {
-  height: 500px;
+  height: 555px;
 }
 
 
@@ -137,7 +137,7 @@ input[type="text"] {
 }
 
 .counter {
-  position: fixed;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -154,7 +154,7 @@ input[type="text"] {
 }
 
 #configuration {
-  height: 375px;
+  height: 440px;
 }
 
 .MuiListItemText-root {

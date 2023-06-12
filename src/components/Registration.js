@@ -178,7 +178,7 @@ export const Registration = () => {
         <Button variant="contained" style={STYLES.btn} onClick={registrationClickHandler} color={"secondary"}>
           Реєстрація
         </Button>
-        <Button color={"secondary"} onClick={() => history.push('/login')}>Login</Button>
+        <Button color={"secondary"} onClick={() => history.push('/login')}>Вхід</Button>
       </div>
       <Toast message={message} open={open} setOpen={setOpen}/>
     </div>
